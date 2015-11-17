@@ -1,0 +1,10 @@
+---
+
+- apt: update_cache=yes upgrade=yes cache_valid_time=3600
+- apt: pkg={{ item }} state=latest
+  with_items:
+    - build-essential
+    - git
+    - libbz2-dev
+    - python-dev
+    - python-pip

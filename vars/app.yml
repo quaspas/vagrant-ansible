@@ -1,0 +1,7 @@
+django_path: /var/www/app/django
+log_path: /var/www/app/logs
+media_path: /var/www/app/media
+static_path: /var/www/app/static
+venv_path: /var/www/app/venv
+application_name: my-app
+repo:

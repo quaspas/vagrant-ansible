@@ -1,0 +1,48 @@
+---
+
+- apt: pkg={{ item }} state=latest force=yes
+  with_items:
+    - nginx
+    - npm
+    - libpq-dev
+    - python-software-properties
+    - libsasl2-dev
+
+- pip: name={{ item }} state=latest
+  with_items:
+    - httplib2
+    - psycopg2
+    - virtualenv
+
+- file: state=directory path={{ item }} owner=www-data group=www-data
+  with_items:
+    - "{{ django_path }}"
+    - "{{ log_path }}"
+    - "{{ media_path }}"
+    - "{{ static_path }}"
+    - "{{ venv_path }}"
+
+- template: src=nginx.conf.j2 dest=/etc/nginx/nginx.conf
+  notify: restart nginx
+
+# copy ssh keys
+- file: path=~/.ssh owner=www-data group=www-data mode=0700 state=directory
+- copy: src=~/.ssh/id_rsa dest=~/.ssh/id_rsa owner=www-data group=www-data mode=0600
+- copy: src=~/.ssh/id_rsa.pub dest=~/.ssh/id_rsa.pub owner=www-data group=www-data mode=0600
+
+# ensure proper permissions for /var/www
+- file: path=/var/www state=directory owner=www-data group=www-data recurse=yes
+
+# pull repo from git
+- git: repo={{ repo }}
+       dest={{ django_path }}
+       version=master
+       accept_hostkey=yes
+       key_file=~/.ssh/id_rsa
+
+# install requirements
+- pip: requirements={{ django_path }}/requirements.txt extra_args='--upgrade'
+       virtualenv={{ venv_path }}
+       virtualenv_command=/usr/local/bin/virtualenv
+
+- pip: name=gunicorn virtualenv={{ venv_path }} virtualenv_command=/usr/local/bin/virtualenv

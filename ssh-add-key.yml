@@ -1,0 +1,12 @@
+---
+
+- hosts: [vagrant]
+  sudo: yes
+  gather_facts: no
+  remote_user: vagrant
+
+  tasks:
+  - name: update authorized keys
+    authorized_key: user=vagrant
+                    key="https://github.com/quaspas.keys"
+                    state=present

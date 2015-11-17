@@ -1,0 +1,11 @@
+---
+
+- hosts: [vagrant]
+  serial: 1
+  sudo: yes
+  user: vagrant
+  roles:
+    - common
+    - app
+  vars_files:
+    - vars/app.yml

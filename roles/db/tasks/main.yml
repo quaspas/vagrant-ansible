@@ -1,0 +1,42 @@
+---
+
+- apt: pkg={{ item }} state=latest force=yes
+  with_items:
+    - libpq-dev
+    - postgresql-9.3
+    - postgresql-contrib-9.3
+
+- pip: name=psycopg2 state=latest
+
+- template: src=pg_hba.conf.j2 dest=/etc/postgresql/9.3/main/pg_hba.conf
+  notify:
+    - reload pg_ctl
+
+- template: src=postgresql.conf.j2 dest=/etc/postgresql/9.3/main/postgresql.conf
+  notify:
+    - restart postgres
+
+# setup the database
+- postgresql_db: name="{{ item }}" encoding='UTF-8'
+  sudo_user: postgres
+  sudo: True
+  with_items:
+    - yield
+
+- postgresql_user: name="app_user" password="{{ db_password }}" role_attr_flags=SUPERUSER,CREATEDB
+  sudo_user: postgres
+  sudo: True
+
+- postgresql_privs: database="{{ item }}" privs=ALL type=database role="app_user"
+  sudo_user: postgres
+  sudo: True
+  with_items:
+    - yield
+
+- file: path=/var/log/postgresql state=directory owner=postgres group=postgres mode=0755 recurse=yes
+
+- ufw: rule=allow port={{ item }}
+  with_items:
+    - 22
+    - 5432
+- ufw: state=enabled policy=deny

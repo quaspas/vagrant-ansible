@@ -1,6 +1,16 @@
 ---
 
-- hosts: [vagrant]
+
+- hosts: [vagrant-db]
+  sudo: yes
+  user: vagrant
+  roles:
+    - common
+    - db
+  vars_files:
+    - vars/app.yml
+
+- hosts: [vagrant-web]
   serial: 1
   sudo: yes
   user: vagrant

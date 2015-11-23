@@ -1,5 +1,9 @@
 ---
 
+- hostname: name={{ hostname }}
+
+- file: state=directory path=/var/www owner=vagrant group=vagrant recurse=yes
+
 - apt: pkg={{ item }} state=latest force=yes
   with_items:
     - nginx
@@ -17,25 +21,15 @@
     - httplib2
     - psycopg2
     - virtualenv
+    - gunicorn
 
-- file: state=directory path={{ item }} owner=www-data group=www-data
+- file: state=directory path={{ item }} owner=vagrant group=vagrant recurse=yes
   with_items:
     - "{{ django_path }}"
-    - "{{ log_path }}"
-    - "{{ media_path }}"
-    - "{{ static_path }}"
-    - "{{ venv_path }}"
 
-- template: src=nginx.conf.j2 dest=/etc/nginx/nginx.conf
-  notify: restart nginx
-
-# copy ssh keys
 - file: path=~/.ssh owner=www-data group=www-data mode=0700 state=directory
 - copy: src=~/.ssh/id_rsa dest=~/.ssh/id_rsa owner=www-data group=www-data mode=0600
 - copy: src=~/.ssh/id_rsa.pub dest=~/.ssh/id_rsa.pub owner=www-data group=www-data mode=0600
-
-# ensure proper permissions for /var/www
-- file: path=/var/www state=directory owner=www-data group=www-data recurse=yes
 
 # pull repo from git
 - git: repo={{ repo }}
@@ -44,9 +38,31 @@
        accept_hostkey=yes
        key_file=~/.ssh/id_rsa
 
+- file: state=directory path={{ item }} owner=vagrant group=vagrant recurse=yes
+  with_items:
+    - "{{ venv_path }}"
+
 # install requirements
 - pip: requirements={{ django_path }}/requirements.txt extra_args='--upgrade'
        virtualenv={{ venv_path }}
        virtualenv_command=/usr/local/bin/virtualenv
 
 - pip: name=gunicorn virtualenv={{ venv_path }} virtualenv_command=/usr/local/bin/virtualenv
+
+- template: src=gunicorn.conf.j2 dest=/etc/init/gunicorn.conf
+
+- service: name=gunicorn state=started
+
+- file: path=/etc/nginx/sites-enabled/default state=absent
+- file: path=/etc/nginx/sites-available/default state=absent
+
+- template: src=nginx.conf.j2 dest=/etc/nginx/nginx.conf
+  notify: restart nginx
+
+- template: src=nginx-app.conf.j2 dest=/etc/nginx/sites-available/nginx-app.conf
+  notify: restart nginx
+
+- file: src=/etc/nginx/sites-available/nginx-app.conf dest=/etc/nginx/sites-enabled/nginx-app.conf state=link
+  notify: restart nginx
+
+- file: path=/var/www/html state=absent

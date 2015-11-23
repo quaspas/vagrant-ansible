@@ -21,17 +21,17 @@
   sudo_user: postgres
   sudo: True
   with_items:
-    - yield
+    - "{{ db_name }}"
 
-- postgresql_user: name="app_user" password="{{ db_password }}" role_attr_flags=SUPERUSER,CREATEDB
+- postgresql_user: name="{{ db_user }}" password="{{ db_password }}" role_attr_flags=SUPERUSER,CREATEDB
   sudo_user: postgres
   sudo: True
 
-- postgresql_privs: database="{{ item }}" privs=ALL type=database role="app_user"
+- postgresql_privs: database="{{ item }}" privs=ALL type=database role="{{ db_user }}"
   sudo_user: postgres
   sudo: True
   with_items:
-    - yield
+    - "{{ db_name }}"
 
 - file: path=/var/log/postgresql state=directory owner=postgres group=postgres mode=0755 recurse=yes
 

@@ -1,1 +1,16 @@
 # {{ ansible_managed }}
+
+server {
+    listen 80;
+    server_name server_domain_or_IP;
+
+    location = /favicon.ico { access_log off; log_not_found off; }
+    location /static/ {
+        root /var/www/webapp;
+    }
+
+    location / {
+        include proxy_params;
+        proxy_pass http://unix:/var/www/webapp/webapp.sock;
+    }
+}

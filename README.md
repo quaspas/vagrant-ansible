@@ -34,4 +34,4 @@ Gotchas
 
 Remove 192.168.33.10 line from known_hosts:
 
-    vi ~/.ssh/known_hosts
+    ssh-keygen -R 192.168.33.10

@@ -1,9 +1,11 @@
 db_password: AAAAAA
 
-django_path: /var/www/app/django
+django_path: /var/www/webapp
 log_path: /var/www/app/logs
 media_path: /var/www/app/media
 static_path: /var/www/app/static
-venv_path: /var/www/app/venv
-application_name: my-app
-repo: git@github.com:gadventures/ops-yieldreport.git
+venv_path: /var/www/webapp/venv
+application_name: webapp
+repo: git@github.com:quaspas/webapp.git
+db_name: webdb
+db_user: web_admin

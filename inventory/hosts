@@ -1,5 +1,5 @@
 [vagrant-web]
-192.168.33.10 fqdn=yield.io hostname=yield-qa workers=2 private_ip=127.0.0.1 subnet=/17
+192.168.33.10 fqdn=app.io hostname=webapp workers=2 private_ip=127.0.0.1 subnet=/17
 
 [vagrant-db]
-192.168.33.15 fqdn=db1.yield.io hostname=yield-db private_ip=192.168.183.247 subnet=/17
+192.168.33.15 fqdn=db.app.io hostname=webdb private_ip=192.168.183.247 subnet=/17
